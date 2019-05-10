@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".ScanActivity"
+    tools:showIn="@layout/activity_scan">
+
+
+    <LinearLayout
+        android:id="@+id/scan_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="50dp"
+        android:gravity="bottom"
+        android:orientation="vertical"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <TextView
+            android:id="@+id/scan_progress_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/scanning_progress_text"
+            android:textAlignment="center"
+            android:textSize="20sp" />
+
+        <ProgressBar
+            android:id="@+id/scan_progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="361dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginTop="25dp"
+            android:layout_marginEnd="25dp"
+            android:max="255"
+            android:progress="0"
+            android:progressTint="@color/colorAccent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/device_list"
+            app:layout_constraintTop_toBottomOf="@+id/device_list" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/device_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+    </ListView>
+</android.support.constraint.ConstraintLayout>
