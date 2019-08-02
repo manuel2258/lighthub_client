@@ -16,8 +16,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.protonmail.manuel2258.activitys.scan_screen.DeviceAddListener;
-import com.protonmail.manuel2258.activitys.scan_screen.DeviceListAdapter;
+import com.protonmail.manuel2258.activitys.scan.DeviceListAdapter;
 import com.protonmail.manuel2258.networking.ScannerTask;
 import com.protonmail.manuel2258.networking.ScannerTaskCallback;
 
@@ -49,25 +48,20 @@ public class ScanActivity extends AppCompatActivity {
             for(InetAddress address: result) {
                 addresses.add(address.getHostAddress());
             }
-            deviceList.setAdapter(new DeviceListAdapter(ScanActivity.this, addresses, new DeviceAddListener() {
-                @Override
-                public void onClick(String address) {
-                    final Intent resultIntent = new Intent();
-                    resultIntent.putExtra("address", address);
-                    setResult(Activity.RESULT_OK, resultIntent);
-                    finish();
-                }
+            deviceList.setAdapter(new DeviceListAdapter(ScanActivity.this, addresses, address -> {
+                final Intent resultIntent = new Intent();
+                resultIntent.putExtra("address", address);
+                setResult(Activity.RESULT_OK, resultIntent);
+                finish();
             }));
             scanProgressLayout.setVisibility(View.INVISIBLE);
         }
 
         @Override
         public void onScanFailure() {
-            Context context = getApplicationContext();
-            CharSequence text = "Could not scan for connections. Make sure you have a active connection";
-            int duration = Toast.LENGTH_SHORT;
-            Toast toast = Toast.makeText(context, text, duration);
-            toast.show();
+            Toast.makeText(ScanActivity.this.getApplicationContext(),
+                    "Could not scan for connections. Make sure you have a active connection",
+                    Toast.LENGTH_SHORT).show();
             currentScannerTask.cancel(true);
         }
 

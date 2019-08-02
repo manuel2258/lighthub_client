@@ -8,13 +8,17 @@ package com.protonmail.manuel2258;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
+import com.protonmail.manuel2258.networking.NetworkManager;
+import com.protonmail.manuel2258.networking.RequestHandler;
+
+import java.io.IOException;
 import java.util.Objects;
 
 public class StartActivity extends AppCompatActivity {
@@ -24,17 +28,42 @@ public class StartActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
         setContentView(R.layout.activity_start);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final Intent intent = new Intent(StartActivity.this, ScanActivity.class);
-                startActivityForResult(intent, 0);
+        Button setupButton = findViewById(R.id.setup_button);
+        setupButton.setOnClickListener(view -> {
+            final String currentHost = "http://" + NetworkManager.getCurrentSubnet(this) + ".1";
+            try {
+                if (RequestHandler.getInstance().isLightHub(currentHost)) {
+                    startActivity(new Intent(this, SetupActivity.class));
+                } else {
+                    Toast.makeText(getBaseContext(), currentHost + " is not a lighthub",
+                            Toast.LENGTH_LONG).show();
+                }
+            } catch (IOException ioException) {
+                Toast.makeText(getBaseContext(), "Error while sending request, " +
+                                "please try again!",
+                        Toast.LENGTH_LONG).show();
             }
+        });
+
+        Button scanButton = findViewById(R.id.change_button);
+        scanButton.setOnClickListener(view -> {
+            final Intent intent = new Intent(StartActivity.this, ScanActivity.class);
+            startActivityForResult(intent, 0);
+        });
+
+        Button debugChangeButton = findViewById(R.id.debug_change_button);
+        debugChangeButton.setOnClickListener(view -> {
+            final Intent intent = new Intent(StartActivity.this, ChangeActivity.class);
+            intent.putExtra("address", "192.168.1.128");
+            startActivityForResult(intent, 0);
         });
     }
 
@@ -43,7 +72,9 @@ public class StartActivity extends AppCompatActivity {
         switch (requestCode) {
             case ADD_NEW_DEVICE_REQUEST:
                 final String address = Objects.requireNonNull(data).getStringExtra("address");
-
+                final Intent intent = new Intent(this, ChangeActivity.class);
+                intent.putExtra("address", address);
+                startActivityForResult(intent, 0);
                 break;
         }
         super.onActivityResult(requestCode, resultCode, data);

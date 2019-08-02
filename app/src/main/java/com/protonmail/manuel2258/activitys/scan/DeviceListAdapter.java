@@ -4,7 +4,7 @@
  * Project: lighthub_client
  */
 
-package com.protonmail.manuel2258.activitys.scan_screen;
+package com.protonmail.manuel2258.activitys.scan;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -56,13 +56,8 @@ public class DeviceListAdapter extends BaseAdapter {
         final TextView text = convertView.findViewById(R.id.address);
         text.setText(currentAddress);
 
-        final Button addButton = convertView.findViewById(R.id.add_device_button);
-        addButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                deviceAddListener.onClick(currentAddress);
-            }
-        });
+        final Button addButton = convertView.findViewById(R.id.apply_time_button);
+        addButton.setOnClickListener(v -> deviceAddListener.onClick(currentAddress));
         return convertView;
     }
 }

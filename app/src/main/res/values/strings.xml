@@ -6,4 +6,5 @@
     <string name="is_lighthub_server_request">{/"load": {/"type/": /"is_lighthub_server/", /"data/": {}}</string>
     <string name="title_activity_start">StartActivity</string>
     <string name="scan_concluding_text">Concluding ...</string>
+    <string name="title_activity_setup">SetupActivity</string>
 </resources>

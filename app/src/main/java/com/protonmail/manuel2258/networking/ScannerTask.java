@@ -17,6 +17,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -37,10 +38,7 @@ public class ScannerTask extends AsyncTask<Void, Integer, Collection<InetAddress
     /**
      * How long the client should wait for a ping answer.
      */
-    private static final int TIMEOUT = 50;
-
-    public static final MediaType JSON
-            = MediaType.get("application/json; charset=utf-8");
+    private static final int TIMEOUT = 100;
 
     /**
      * The to call callback interface.
@@ -57,7 +55,6 @@ public class ScannerTask extends AsyncTask<Void, Integer, Collection<InetAddress
      */
     private final List<InetAddress> onlineDeviceList = new ArrayList<>();
 
-    OkHttpClient client = new OkHttpClient();
 
     private JSONObject jsonRequest;
 
@@ -68,14 +65,8 @@ public class ScannerTask extends AsyncTask<Void, Integer, Collection<InetAddress
      */
     @SuppressLint("DefaultLocale")
     public ScannerTask(Activity invokeActivity, ScannerTaskCallback callback) {
-        final WifiManager wifiManager = (WifiManager) invokeActivity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        final int subNetInt = wifiManager.getDhcpInfo().gateway;
         scannerTaskCallback = callback;
-        subnetString = String.format(
-                "%d.%d.%d",
-                (subNetInt & 0xff),
-                (subNetInt >> 8 & 0xff),
-                (subNetInt >> 16 & 0xff));
+        subnetString = NetworkManager.getCurrentSubnet(invokeActivity);
         try {
             final JSONObject load = new JSONObject();
             load.put("type", "is_lighthub");
@@ -94,24 +85,22 @@ public class ScannerTask extends AsyncTask<Void, Integer, Collection<InetAddress
      */
     @Override
     protected Collection<InetAddress> doInBackground(Void... voids) {
-        for(int i = 0; i < 255; i++) {
-            final String currentSubnet = subnetString + "." +i;
+        for(int i = 1; i < 255; i++) {
+            final String currentSubnet = subnetString + "." + i;
             try {
                 final InetAddress currentAddress = InetAddress.getByName(currentSubnet);
                 if (currentAddress.isReachable(TIMEOUT)) {
-                    addIfLighthub(currentAddress);
+                    if(RequestHandler.getInstance().isLightHub("http://" + currentAddress.getHostAddress())) {
+                        onlineDeviceList.add(currentAddress);
+                    }
                 }
-            } catch (IOException ioException) {
-                scannerTaskCallback.onScanFailure();
-            }
+            } catch (IOException ioException) {}
             finally {
                 publishProgress(i);
             }
         }
 
         publishProgress(999);
-
-        System.out.println("Found: " + onlineDeviceList.size() + " devices");
         return onlineDeviceList;
     }
 
@@ -130,34 +119,4 @@ public class ScannerTask extends AsyncTask<Void, Integer, Collection<InetAddress
         scannerTaskCallback.onScanSuccess(result);
     }
 
-    /**
-     * Sends a get request to the server to check if it is a lighthub.
-     * If a true is returned adds it to the deviceList
-     * @param address The to check address
-     */
-    private void addIfLighthub(final InetAddress address) {
-        try {
-            RequestBody body = RequestBody.create(JSON, "{\"load\": {\"type\": \"is_lighthub_server\", \"data\": {}}}");
-            Request request = new Request.Builder()
-                    .url("http://" + address.getHostAddress())
-                    .post(body)
-                    .build();
-            String test = "http://" + address.getHostAddress();
-            if(test.equals("http://192.168.1.101")) {
-                System.out.println(test);
-            }
-            try {
-                final Call call = client.newCall(request);
-                final Response response = call.execute();
-                final JSONObject myResponse = new JSONObject(response.body().string());
-                if((boolean)myResponse.get("is_lighthub")) {
-                    onlineDeviceList.add(address);
-                }
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-            }
-        } catch (JSONException jsonException) {
-            System.out.println(jsonException.getMessage());
-        }
-    }
 }

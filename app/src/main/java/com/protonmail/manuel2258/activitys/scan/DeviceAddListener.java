@@ -4,10 +4,9 @@
  * Project: lighthub_client
  */
 
-package com.protonmail.manuel2258.activitys.scan_screen;
+package com.protonmail.manuel2258.activitys.scan;
 
+@FunctionalInterface
 public interface DeviceAddListener {
-
     void onClick(String address);
-
 }
