@@ -53,15 +53,6 @@ public class ChangeActivity extends AppCompatActivity {
                     "please try again!", Toast.LENGTH_LONG).show();
         }
 
-        List<RangeContainer> startRangeContainers = new ArrayList<>();
-        try {
-            startRangeContainers = RequestHandler.getInstance().getTimes(currentAddress);
-        } catch (IOException ioException) {
-            Toast.makeText(getBaseContext(), "Error while getting initial mode, " +
-                    "please try again!", Toast.LENGTH_LONG).show();
-        }
-        final List<RangeContainer> rangeContainers = startRangeContainers;
-
         ((TextView)findViewById(R.id.address_label)).setText(currentAddress);
         CheckBox enableTimingCheckbox = findViewById(R.id.enable_timing_checkbox);
         Button changeColorButton = findViewById(R.id.change_color_button);
@@ -72,11 +63,11 @@ public class ChangeActivity extends AppCompatActivity {
 
         setupTimingCheckbox(enableTimingCheckbox, addTimeButton, timingsList, startMode);
 
-        final TimeListAdapter listAdapter = new TimeListAdapter(this, rangeContainers, currentAddress);
+        final TimeListAdapter listAdapter = new TimeListAdapter(this, new ArrayList<>(), currentAddress);
         timingsList.setAdapter(listAdapter);
 
         addTimeButton.setOnClickListener(view -> {
-            rangeContainers.add(new RangeContainer(
+            listAdapter.data.add(new RangeContainer(
                     new DateRange(new DateTime(0, 0),
                             new DateTime(1, 0)),1));
             listAdapter.notifyDataSetChanged();
@@ -89,7 +80,6 @@ public class ChangeActivity extends AppCompatActivity {
         changeColorButton.setOnClickListener(view -> new ColorPickerPopup.Builder(this)
                 .initialColor(currentColor)
                 .enableBrightness(true)
-                .enableAlpha(true)
                 .okTitle("Apply")
                 .cancelTitle("Cancel")
                 .showIndicator(true)

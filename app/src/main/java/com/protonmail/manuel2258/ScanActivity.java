@@ -3,10 +3,9 @@ package com.protonmail.manuel2258;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,24 +16,28 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.protonmail.manuel2258.activitys.scan.DeviceListAdapter;
+import com.protonmail.manuel2258.networking.RequestHandler;
 import com.protonmail.manuel2258.networking.ScannerTask;
 import com.protonmail.manuel2258.networking.ScannerTaskCallback;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class ScanActivity extends AppCompatActivity {
 
-    private AsyncTask currentScannerTask;
+    private ScannerTask currentScannerTask;
     private ListView deviceList;
 
     private LinearLayout scanProgressLayout;
     private ProgressBar scanProgressBar;
     private TextView scanProgressText;
 
-    // Creates a new anonymous ScannerTaskCallback class
+    private List<String> addresses = new ArrayList<>();
+
     private ScannerTaskCallback scannerTaskCallback = new ScannerTaskCallback() {
         @Override
         public void onScanSuccess(Collection<InetAddress> result) {
@@ -44,16 +47,18 @@ public class ScanActivity extends AppCompatActivity {
             Toast toast = Toast.makeText(context, text, duration);
             toast.show();
 
-            List<String> addresses = new ArrayList<>();
+            SharedPreferences preferences = getApplicationContext().
+                    getSharedPreferences("saved_addresses", 0);
+            SharedPreferences.Editor editor = preferences.edit();
             for(InetAddress address: result) {
                 addresses.add(address.getHostAddress());
+                editor.putString(address.getHostAddress(), "-");
             }
-            deviceList.setAdapter(new DeviceListAdapter(ScanActivity.this, addresses, address -> {
-                final Intent resultIntent = new Intent();
-                resultIntent.putExtra("address", address);
-                setResult(Activity.RESULT_OK, resultIntent);
-                finish();
-            }));
+            editor.apply();
+            if(result.size() > 0) {
+                refreshList();
+            }
+
             scanProgressLayout.setVisibility(View.INVISIBLE);
         }
 
@@ -76,13 +81,20 @@ public class ScanActivity extends AppCompatActivity {
         }
     };
 
+    private void refreshList() {
+        deviceList.setAdapter(new DeviceListAdapter(ScanActivity.this, addresses, address -> {
+            currentScannerTask.cancelExecution();
+            final Intent resultIntent = new Intent();
+            resultIntent.putExtra("address", address);
+            setResult(Activity.RESULT_OK, resultIntent);
+            finish();
+        }));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         // Get activity views
         deviceList = findViewById(R.id.device_list);
@@ -90,8 +102,30 @@ public class ScanActivity extends AppCompatActivity {
         scanProgressText = findViewById(R.id.scan_progress_text);
         scanProgressLayout = findViewById(R.id.scan_layout);
 
+        // Checks for saved addresses
+        SharedPreferences preferences = getApplicationContext().
+                getSharedPreferences("saved_addresses", 0);
+        for (Map.Entry<String, ?> entry : preferences.getAll().entrySet()) {
+            try {
+
+                String address = entry.getKey();
+                final InetAddress currentAddress = InetAddress.getByName(address);
+                if (currentAddress.isReachable(100)) {
+                    if (RequestHandler.getInstance()
+                            .isLightHub("http://" + currentAddress.getHostAddress())) {
+                        String host = currentAddress.getHostAddress();
+                        addresses.add(host);
+                    }
+                }
+
+            } catch (IOException ignore) { }
+        }
+
+        refreshList();
+
         // Starts the scanner task
-        currentScannerTask = new ScannerTask(ScanActivity.this, scannerTaskCallback).execute();
+        currentScannerTask = new ScannerTask(ScanActivity.this, scannerTaskCallback);
+        currentScannerTask.execute();
         scanProgressBar.setVisibility(View.VISIBLE);
     }
 

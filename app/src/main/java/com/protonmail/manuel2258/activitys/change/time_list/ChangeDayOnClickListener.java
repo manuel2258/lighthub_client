@@ -8,6 +8,7 @@ package com.protonmail.manuel2258.activitys.change.time_list;
 
 import android.graphics.Color;
 import android.view.View;
+import android.widget.TextView;
 
 import com.protonmail.manuel2258.activitys.change.dates.RangeContainer;
 
@@ -30,11 +31,12 @@ class ChangeDayOnClickListener implements View.OnClickListener {
     }
 
     private void updateState(View view) {
+        TextView textView = (TextView)view;
         if(currentState) {
-            view.setBackgroundColor(Color.BLUE);
+            textView.setTextColor(Color.argb(255, 230,81,0));
             container.addDay(day);
         } else {
-            view.setBackgroundColor(Color.WHITE);
+            textView.setTextColor(Color.argb(255, 33,33,33));
             container.removeDay(day);
         }
     }

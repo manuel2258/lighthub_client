@@ -18,7 +18,11 @@ import java.util.List;
 /** A builder class to build a list of RangeContainers */
 public class RangeContainerBuilder {
 
-    private final List<RangeContainer> rangeContainers = new ArrayList<>();
+    private final List<RangeContainer> rangeContainers;
+
+    public RangeContainerBuilder() {
+        rangeContainers = new ArrayList<>();
+    }
 
     /**
      * Adds the DateRange to a container or creates a new one for it if non fits

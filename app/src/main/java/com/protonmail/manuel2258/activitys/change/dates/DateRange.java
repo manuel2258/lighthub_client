@@ -21,12 +21,17 @@ import java.util.Objects;
  */
 public class DateRange {
 
-    private final DateTime start;
-    private final DateTime end;
+    private DateTime start;
+    private DateTime end;
 
     public DateRange(DateTime start, DateTime end) {
         this.start = start;
         this.end = end;
+    }
+
+    public DateRange(DateRange that) {
+        this.start = that.getStart();
+        this.end = that.getEnd();
     }
 
     public DateTime getStart() {

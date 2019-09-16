@@ -27,7 +27,7 @@ import java.util.Set;
 /**
  * A container for several same DateRanges in different days
  */
-public class RangeContainer {
+public class RangeContainer implements Comparable<RangeContainer> {
 
     /** Simple reference to the first item */
     private DateRange dateRange;
@@ -40,6 +40,11 @@ public class RangeContainer {
         days.add(startDay);
     }
 
+    public RangeContainer(RangeContainer that) {
+        this.dateRange = new DateRange(that.getDateRange());
+        days.addAll(that.getDays());
+    }
+
     public DateTime getStart() {
         return dateRange.getStart();
     }
@@ -48,9 +53,19 @@ public class RangeContainer {
         return dateRange.getEnd();
     }
 
+    public DateRange getDateRange() {
+        return dateRange;
+    }
+
+    public Set<Integer> getDays() {
+        return days;
+    }
+
     public void setDateRangeFromString(String startDate, String endDate) throws IllegalArgumentException {
-        this.dateRange = new DateRange(getTimeFromString(startDate),
-                getTimeFromString(endDate));
+        try {
+            this.dateRange = new DateRange(getTimeFromString(startDate),
+                    getTimeFromString(endDate));
+        } catch (NumberFormatException ignored) {}
     }
 
     public boolean addDay(int day) {
@@ -98,6 +113,13 @@ public class RangeContainer {
         return Collections.unmodifiableCollection(days);
     }
 
+    public float[] getAverageTime() {
+        float[] averages = new float[2];
+        averages[0] = (getStart().getHour() + getEnd().getHour()) / 2f;
+        averages[1] = (getStart().getMinute() + getEnd().getMinute()) / 2f;
+        return averages;
+    }
+
     @SuppressLint("DefaultLocale")
     @Override
     public String toString() {
@@ -107,13 +129,24 @@ public class RangeContainer {
                 start.getHour(), start.getMinute(), end.getHour(), end.getMinute());
     }
 
-    private DateTime getTimeFromString(String date) throws IllegalArgumentException {
+    @Override
+    public int compareTo(RangeContainer that) {
+        float[] thisAverages = getAverageTime();
+        float[] thatAverages = that.getAverageTime();
+        int hourDif = (int)Math.signum(thatAverages[0]-thatAverages[0]);
+        if(hourDif != 0) {
+            return hourDif;
+        }
+        return (int)Math.signum(thatAverages[1]-thatAverages[1]);
+    }
+
+    private DateTime getTimeFromString(String date) throws IllegalArgumentException, NumberFormatException {
         int firstBinding = date.indexOf(':');
         if(firstBinding != date.lastIndexOf(':')) {
             throw new IllegalArgumentException();
         }
         int hour = Integer.parseInt(date.substring(0, firstBinding));
-        int minute = Integer.parseInt(date.substring(firstBinding+1, date.length()));
+        int minute = Integer.parseInt(date.substring(firstBinding + 1, date.length()));
         return new DateTime(hour, minute);
     }
 }

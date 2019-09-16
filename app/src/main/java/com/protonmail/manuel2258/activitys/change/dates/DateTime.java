@@ -26,6 +26,11 @@ public class DateTime {
         this.minute = minute;
     }
 
+    public DateTime(DateTime that) {
+        hour = that.getHour();
+        minute = that.getMinute();
+    }
+
     public int getHour() {
         return hour;
     }

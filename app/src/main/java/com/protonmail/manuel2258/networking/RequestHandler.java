@@ -9,19 +9,11 @@ package com.protonmail.manuel2258.networking;
 import android.annotation.SuppressLint;
 import android.graphics.Color;
 
-import com.protonmail.manuel2258.activitys.change.dates.DateRange;
-import com.protonmail.manuel2258.activitys.change.dates.DateTime;
-import com.protonmail.manuel2258.activitys.change.dates.RangeContainer;
-import com.protonmail.manuel2258.activitys.change.dates.RangeContainerBuilder;
-
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.MediaType;
@@ -97,27 +89,24 @@ public abstract class RequestHandler {
      * Gets the current used timeRanges from the device
      * @param address The to get from address
      * @return A List of DateRanges representing the timeRanges
-     * @throws IOException If there is a problem with the connection to the address
      */
-    public abstract List<RangeContainer> getTimes(String address) throws IOException;
+    public abstract void getTimes(String address, AsyncRequestCallback callback);
 
     /**
      * Adds a DateRange to the device
      * @param address The to add to address
      * @param dateRange The to add dateRange
      * @return The updated DateRanges on the device
-     * @throws IOException If there is a problem with the connection to the address
      */
-    public abstract List<RangeContainer> addTime(String address, String dateRange) throws IOException;
+    public abstract void addTime(String address, String dateRange, AsyncRequestCallback callback);
 
     /**
      * Removes a DateRange from the device
      * @param address The to remove from address
      * @param dateRange The to remove DateRange
      * @return The updated DateRanges on the device
-     * @throws IOException If there is a problem with the connection to the address
      */
-    public abstract List<RangeContainer> removeTime(String address, String dateRange) throws IOException;
+    public abstract void removeTime(String address, String dateRange, AsyncRequestCallback callback);
 }
 
 /** A RequestHandler implementation using the OkHttp Library */
@@ -241,53 +230,26 @@ class OkHttpRequestHandler extends RequestHandler {
     }
 
     @Override
-    public List<RangeContainer> getTimes(String address) throws IOException {
-        List<RangeContainer> dateRanges = new ArrayList<>();
-        try {
-            final String message = "{\"load\": {\"type\": \"get_times\", " +
-                    "\"request_type\": \"get\", \"data\": {}}}";
-            final JSONObject response = makeCall(address, message);
-            final JSONArray times = response.getJSONObject("load").getJSONArray("data");
-            dateRanges = parseContainersFromJsonArray(times);
-
-        } catch (JSONException jsonException) {
-            System.out.println(jsonException.getMessage());
-        }
-        return dateRanges;
+    public void getTimes(String address, AsyncRequestCallback callback) {
+        final String message = "{\"load\": {\"type\": \"get_times\", " +
+                "\"request_type\": \"get\", \"data\": {}}}";
+        makeAsyncCall(address, message, callback);
     }
 
     @Override
-    public List<RangeContainer> addTime(String address, String dateRange) throws IOException {
-        List<RangeContainer> dateRanges = new ArrayList<>();
-        boolean successful = false;
-        try {
-            @SuppressLint("DefaultLocale") final String message = String.format("{\"load\": {\"type\": \"add_time\", " +
-                    "\"request_type\": \"post\"," +
-                    "\"data\": %s}}", dateRange);
-            final JSONObject response = makeCall(address, message);
-            final JSONArray times = response.getJSONObject("load").getJSONArray("data");
-            dateRanges = parseContainersFromJsonArray(times);
-        } catch (JSONException jsonException) {
-            System.out.println(jsonException.getMessage());
-        }
-        return dateRanges;
+    public void addTime(String address, String dateRange, AsyncRequestCallback callback) {
+        @SuppressLint("DefaultLocale") final String message = String.format("{\"load\": {\"type\": \"add_time\", " +
+                "\"request_type\": \"post\"," +
+                "\"data\": %s}}", dateRange);
+        makeAsyncCall(address, message, callback);
     }
 
     @Override
-    public List<RangeContainer> removeTime(String address, String dateRange) throws IOException {
-        List<RangeContainer> dateRanges = new ArrayList<>();
-        boolean successful = false;
-        try {
-            @SuppressLint("DefaultLocale") final String message = String.format("{\"load\": {\"type\": \"remove_time\", " +
-                    "\"request_type\": \"post\"," +
-                    "\"data\": %s}}", dateRange);
-            final JSONObject response = makeCall(address, message);
-            final JSONArray times = response.getJSONObject("load").getJSONArray("data");
-            dateRanges = parseContainersFromJsonArray(times);
-        } catch (JSONException jsonException) {
-            System.out.println(jsonException.getMessage());
-        }
-        return dateRanges;
+    public void removeTime(String address, String dateRange, AsyncRequestCallback callback) {
+        @SuppressLint("DefaultLocale") final String message = String.format("{\"load\": {\"type\": \"remove_time\", " +
+                "\"request_type\": \"post\"," +
+                "\"data\": %s}}", dateRange);
+        makeAsyncCall(address, message, callback);
     }
 
 
@@ -313,6 +275,23 @@ class OkHttpRequestHandler extends RequestHandler {
     }
 
     /**
+     * Makes a call async to the given address using json String
+     * @param address The to call to address
+     * @param jsonMessage The to send body message
+     * @param callback The to execute callback
+     */
+    private void makeAsyncCall(String address, String jsonMessage, AsyncRequestCallback callback) {
+        RequestBody body = RequestBody.create(JSON, jsonMessage);
+        Request request = new Request.Builder()
+                .url(address)
+                .post(body)
+                .build();
+
+        Call call = client.newCall(request);
+        new AsyncRequestTask(call, callback).execute();
+    }
+
+    /**
      * Converts a int value into a unsigned int array
      * @param color The to convert color
      * @return A 3 long int array
@@ -321,28 +300,9 @@ class OkHttpRequestHandler extends RequestHandler {
         byte[] bytes = ByteBuffer.allocate(4).putInt(color).array();
         int[] colorValues = new int[3];
         for (int i = 0; i < 3; i++) {
-            colorValues[i] = (int)((bytes[i+1] & 0xFF) * ((float)(bytes[0]& 0xFF)/255));
+            colorValues[i] = (int)((bytes[i+1] & 0xFF));
         }
         return colorValues;
     }
 
-    /**
-     * Parses a List of RangeContainers from a jsonArray
-     * @param jsonArray The to parse from array
-     * @return The list of RangeContainers
-     * @throws JSONException If the array contains invalid information
-     */
-    private List<RangeContainer> parseContainersFromJsonArray(JSONArray jsonArray) throws JSONException {
-        final RangeContainerBuilder rangeContainerBuilder = new RangeContainerBuilder();
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject time = jsonArray.getJSONObject(i);
-            rangeContainerBuilder.add(new DateRange(
-                            new DateTime(time.getInt("s_h"),
-                                    time.getInt("s_m")),
-                            new DateTime(time.getInt("e_h"),
-                                    time.getInt("e_m"))),
-                    time.getInt("s_d"));
-        }
-        return rangeContainerBuilder.build();
-    }
 }

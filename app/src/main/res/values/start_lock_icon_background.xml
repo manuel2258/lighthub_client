@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Date: 9/16/19 5:32 PM
+  ~ Author: Manuel Schmidbauer, manuel2258@protonmail.com
+  ~ Project: lighthub_client
+  -->
+
+<resources>
+    <color name="start_lock_icon_background">#212121</color>
+</resources>

@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -33,8 +32,6 @@ public class StartActivity extends AppCompatActivity {
         StrictMode.setThreadPolicy(policy);
 
         setContentView(R.layout.activity_start);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         Button setupButton = findViewById(R.id.setup_button);
         setupButton.setOnClickListener(view -> {
@@ -58,13 +55,6 @@ public class StartActivity extends AppCompatActivity {
             final Intent intent = new Intent(StartActivity.this, ScanActivity.class);
             startActivityForResult(intent, 0);
         });
-
-        Button debugChangeButton = findViewById(R.id.debug_change_button);
-        debugChangeButton.setOnClickListener(view -> {
-            final Intent intent = new Intent(StartActivity.this, ChangeActivity.class);
-            intent.putExtra("address", "192.168.1.128");
-            startActivityForResult(intent, 0);
-        });
     }
 
     @Override
@@ -74,7 +64,7 @@ public class StartActivity extends AppCompatActivity {
                 final String address = Objects.requireNonNull(data).getStringExtra("address");
                 final Intent intent = new Intent(this, ChangeActivity.class);
                 intent.putExtra("address", address);
-                startActivityForResult(intent, 0);
+                startActivity(intent);
                 break;
         }
         super.onActivityResult(requestCode, resultCode, data);

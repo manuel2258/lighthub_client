@@ -23,15 +23,16 @@
             android:layout_height="wrap_content"
             android:text="SSID"
             android:textAlignment="center"
-            android:textSize="24sp" />
+            android:textSize="30sp" />
 
         <Spinner
             android:id="@+id/ssid_spinner"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:dropDownWidth="match_parent"
             android:entries="@android:array/emailAddressTypes"
-            android:spinnerMode="dropdown" />
+            android:spinnerMode="dropdown"
+            android:textAlignment="center" />
 
         <TextView
             android:id="@+id/password_label"
@@ -39,7 +40,7 @@
             android:layout_height="wrap_content"
             android:text="Password"
             android:textAlignment="center"
-            android:textSize="24sp" />
+            android:textSize="30sp" />
 
         <EditText
             android:id="@+id/password_input"
@@ -47,7 +48,6 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="textPersonName"
-            android:text="Name"
             android:textAlignment="center"
             android:textSize="24sp" />
 

@@ -8,8 +8,6 @@ package com.protonmail.manuel2258.networking;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
-import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 
 import org.json.JSONException;
@@ -17,17 +15,10 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import okhttp3.Call;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 /**
  * A Async Task to scan for local devices.
@@ -55,8 +46,7 @@ public class ScannerTask extends AsyncTask<Void, Integer, Collection<InetAddress
      */
     private final List<InetAddress> onlineDeviceList = new ArrayList<>();
 
-
-    private JSONObject jsonRequest;
+    private boolean active;
 
     /**
      * Creates a new activity bound scanner task.
@@ -71,9 +61,8 @@ public class ScannerTask extends AsyncTask<Void, Integer, Collection<InetAddress
             final JSONObject load = new JSONObject();
             load.put("type", "is_lighthub");
             load.put("data", new JSONObject());
-            jsonRequest = new JSONObject();
-            jsonRequest.put("load", load);
         } catch (JSONException ignore) { }
+        active = true;
     }
 
     /**
@@ -98,6 +87,9 @@ public class ScannerTask extends AsyncTask<Void, Integer, Collection<InetAddress
             finally {
                 publishProgress(i);
             }
+            if(!active) {
+                break;
+            }
         }
 
         publishProgress(999);
@@ -117,6 +109,13 @@ public class ScannerTask extends AsyncTask<Void, Integer, Collection<InetAddress
     @Override
     protected void onPostExecute(Collection<InetAddress> result) {
         scannerTaskCallback.onScanSuccess(result);
+    }
+
+    /**
+     * Cancels execution after the next iteration
+     */
+    public void cancelExecution() {
+        active = false;
     }
 
 }

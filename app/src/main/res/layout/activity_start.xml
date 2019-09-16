@@ -22,20 +22,15 @@
         <Button
             android:id="@+id/setup_button"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:text="Setup device" />
 
         <Button
             android:id="@+id/change_button"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Change devices" />
+            android:layout_height="50dp"
+            android:text="Change device" />
 
-        <Button
-            android:id="@+id/debug_change_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="!!!DEBUG CHANGE!!!" />
     </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>

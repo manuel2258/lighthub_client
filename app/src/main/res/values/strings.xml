@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">lighthub_client</string>
+    <string name="app_name">Lighthub Client</string>
     <string name="action_settings">Settings</string>
     <string name="device_list_name">Address: </string>
     <string name="scanning_progress_text">Scanned %d from 255</string>
