@@ -121,6 +121,13 @@
             android:orientation="horizontal">
 
             <Button
+                android:id="@+id/sunday_button"
+                android:layout_width="57dp"
+                android:layout_height="57dp"
+                android:text="S"
+                android:textSize="18sp" />
+
+            <Button
                 android:id="@+id/monday_button"
                 android:layout_width="57dp"
                 android:layout_height="57dp"
@@ -158,13 +165,6 @@
 
             <Button
                 android:id="@+id/saturday_button"
-                android:layout_width="57dp"
-                android:layout_height="57dp"
-                android:text="S"
-                android:textSize="18sp" />
-
-            <Button
-                android:id="@+id/sunday_button"
                 android:layout_width="57dp"
                 android:layout_height="57dp"
                 android:text="S"

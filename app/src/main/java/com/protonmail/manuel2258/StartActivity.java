@@ -44,8 +44,7 @@ public class StartActivity extends AppCompatActivity {
                             Toast.LENGTH_LONG).show();
                 }
             } catch (IOException ioException) {
-                Toast.makeText(getBaseContext(), "Error while sending request, " +
-                                "please try again!",
+                Toast.makeText(getBaseContext(), ioException.getMessage(),
                         Toast.LENGTH_LONG).show();
             }
         });
@@ -59,13 +58,11 @@ public class StartActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        switch (requestCode) {
-            case ADD_NEW_DEVICE_REQUEST:
-                final String address = Objects.requireNonNull(data).getStringExtra("address");
-                final Intent intent = new Intent(this, ChangeActivity.class);
-                intent.putExtra("address", address);
-                startActivity(intent);
-                break;
+        if (requestCode == ADD_NEW_DEVICE_REQUEST) {
+            final String address = Objects.requireNonNull(data).getStringExtra("address");
+            final Intent intent = new Intent(this, ChangeActivity.class);
+            intent.putExtra("address", address);
+            startActivity(intent);
         }
         super.onActivityResult(requestCode, resultCode, data);
     }

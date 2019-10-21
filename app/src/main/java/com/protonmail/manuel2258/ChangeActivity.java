@@ -69,7 +69,7 @@ public class ChangeActivity extends AppCompatActivity {
         addTimeButton.setOnClickListener(view -> {
             listAdapter.data.add(new RangeContainer(
                     new DateRange(new DateTime(0, 0),
-                            new DateTime(1, 0)),1));
+                            new DateTime(1, 0)),0));
             listAdapter.notifyDataSetChanged();
         });
 

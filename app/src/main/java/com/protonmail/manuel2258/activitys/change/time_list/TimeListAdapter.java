@@ -124,9 +124,9 @@ public class TimeListAdapter extends BaseAdapter {
         fromInput.setOnFocusChangeListener(inputFocusCallback);
         toInput.setOnFocusChangeListener(inputFocusCallback);
 
-        for(int i = 1; i <= buttonParentView.getChildCount(); i++) {
+        for(int i = 0; i < buttonParentView.getChildCount(); i++) {
             final boolean initialState = days.contains(i);
-            Button currentButton = (Button)buttonParentView.getChildAt(i-1);
+            Button currentButton = (Button)buttonParentView.getChildAt(i);
             currentButton.setOnClickListener(new ChangeDayOnClickListener(currentButton, container, i, initialState));
         }
 
